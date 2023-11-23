@@ -54,6 +54,9 @@
     <ClCompile Include="PacketSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dep\ConsoleLogger\ConsoleLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h">
@@ -95,5 +98,11 @@
     <ClInclude Include="PacketSerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dep\ConsoleLogger\ConsoleLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dep\ConsoleLogger\ConsoleLoggerHelper.exe" />
   </ItemGroup>
 </Project>

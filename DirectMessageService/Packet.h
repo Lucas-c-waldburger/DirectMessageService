@@ -1,133 +1,162 @@
 #pragma once
 #include "Utils.h"
+#include "PacketSerializer.h"
 
 using namespace Utils;
 
-enum class PacketType
+enum PacketType
 {
-	MESSAGE = 1,
+	UNSPEC,
+	MESSAGE,
 	CHANNEL_OPEN_REQ,
 	CHANNEL_CLOSE_REQ,
 	LIST_USERS_REQ,
-	
 };
 
-template <typename T, int BUF_SIZE>
+
 class Packet
 {
 public:
-	Packet(Endian byteOrd);
+	Packet();
+	Packet(PacketType type);
 	virtual ~Packet() = 0;
 
-	char* readBuf();
-	virtual void clearBuf();
+	//static std::unique_ptr<OutPacket> makeOutPacket(PacketType);
+	//char* readBuf();
+	//virtual void clearBuf();
 
 protected:
-	//friend class boost::serialization::access;
+	friend class boost::serialization::access;
+	friend class SerialPacket;
 
-	char buf[BUF_SIZE];
-	Endian byteOrdering;
+	template <class Archive>
+	void serialize(Archive& ar, const unsigned int version)
+	{
+		ar& packType;
+		ar& dataStr;
+	}
+
 	PacketType packType;
+	std::string dataStr;
 };
 
-template <typename T, int BUF_SIZE>
-class OutPacket : public Packet<T, BUF_SIZE>
+////// OUT //////
+class OutPacket : public Packet
 {
 public:
 	OutPacket();
+	OutPacket(PacketType type);
 	virtual ~OutPacket() override;
 
-	virtual void clearBuf() override;
-	virtual void fill(T data);
-	bool isEmpty();
+	//virtual void clearBuf() override;
+	//virtual void fill(T data);
+	//bool isEmpty();
 
-protected:
-	bool empty;
+private:
+	friend class boost::serialization::access;
+	template <class Archive>
+	void serialize(Archive& ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<Packet>(*this);
+		ar& packType;
+		ar& dataStr;
+	}
 };
 
-template <typename T, int BUF_SIZE>
-class InPacket : public Packet<T, BUF_SIZE>
+////// IN //////
+class InPacket : public Packet
 {
 public:
 	InPacket();
+	InPacket(PacketType type);
 	virtual ~InPacket() override;
 
-	virtual T getData();
-
-protected:
-	T data;
+private:
+	friend class boost::serialization::access;
+	template <class Archive>
+	void serialize(Archive& ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<Packet>(*this);
+		ar & packType;
+		ar & dataStr;
+	}
 };
+
+////// SERIALIZING TOOL //////
+
+class SerialPacket
+{
+public:
+	SerialPacket();
+	~SerialPacket();
+
+	char* serialize(const OutPacket& outPack);
+	void deserialize(InPacket& inPack);
+
+	void clear();
+
+private:
+	std::string serialStr;
+	char* serialBuf;
+
+	void prepSerialBuf(size_t strSz);
+};
+
+
+
+
 
 // ------------------------ DEFINITIONS ---------------------------- //
 
 // -------------- Packet --------------- //
 
-template<typename T, int BUF_SIZE>
-inline Packet<T, BUF_SIZE>::Packet(Endian byteOrd) : byteOrdering(byteOrd)
-{
-	clearBuf();
-}
 
-template<typename T, int BUF_SIZE>
-inline char* Packet<T, BUF_SIZE>::readBuf()
-{
-	return this->buf;
-}
-
-template<typename T, int BUF_SIZE>
-inline void Packet<T, BUF_SIZE>::clearBuf()
-{
-	memset(this->buf, 0, sizeof(this->buf));
-}
+//template<typename T, int BUF_SIZE>
+//inline char* Packet<T>::readBuf()
+//{
+//	return this->buf;
+//}
+//
+//template<typename T, int BUF_SIZE>
+//inline void Packet<T>::clearBuf()
+//{
+//	memset(this->buf, 0, sizeof(this->buf));
+//}
 
 
 // -------------- OutPacket --------------- //
 
-template<typename T, int BUF_SIZE>
-inline OutPacket<T, BUF_SIZE>::OutPacket() : Packet<T, BUF_SIZE>(Endian::TO_NETWORK), empty(true)
-{}
 
-template<typename T, int BUF_SIZE>
-inline OutPacket<T, BUF_SIZE>::~OutPacket()
-{}
+//template<typename T>
+//inline void OutPacket<T>::clearBuf()
+//{
+//	Packet<T, BUF_SIZE>::clearBuf();
+//	empty = true;
+//}
 
-template<typename T, int BUF_SIZE>
-inline void OutPacket<T, BUF_SIZE>::clearBuf()
-{
-	Packet<T, BUF_SIZE>::clearBuf();
-	empty = true;
-}
-
-template<typename T, int BUF_SIZE>
-inline void OutPacket<T, BUF_SIZE>::fill(T data)
-{
-	T orderedData = convertDataByteOrder(data, this->byteOrdering);
-	memcpy(this->buf, &orderedData, sizeof(orderedData));
-	empty = false;
-}
-
-template<typename T, int BUF_SIZE>
-inline bool OutPacket<T, BUF_SIZE>::isEmpty()
-{
-	return empty;
-}
+//template<typename T>
+//inline void OutPacket<T>::fill(T data)
+//{
+//	T orderedData = convertDataByteOrder(data, this->byteOrdering);
+//	memcpy(this->buf, &orderedData, sizeof(orderedData));
+//	empty = false;
+//}
+//
+//template<typename T>
+//inline bool OutPacket<T>::isEmpty()
+//{
+//	return empty;
+//}
 
 
 // -------------- InPacket --------------- //
 
-template<typename T, int BUF_SIZE>
-inline InPacket<T, BUF_SIZE>::InPacket() : Packet<T, BUF_SIZE>(Endian::TO_HOST)
-{}
 
-template<typename T, int BUF_SIZE>
-inline InPacket<T, BUF_SIZE>::~InPacket()
-{}
-
-template<typename T, int BUF_SIZE>
-inline T InPacket<T, BUF_SIZE>::getData()
-{
-	return data;
-}
+//template<typename T>
+//inline T InPacket<T>::getData()
+//{
+//	return data;
+//}
 
 
 // -------------- Serialize / Deserialize --------------- //

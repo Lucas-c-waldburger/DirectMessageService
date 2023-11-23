@@ -11,6 +11,8 @@ Server::Server(const char* host, const char* port) : pollGroup(nullptr)
 		throw std::runtime_error(failed);
 
 	pollGroup = std::make_unique<PollGroup>(listener.getAddrData()->fd);
+
+	std::cout << "Server set up successful. Listening for new connections...\n";
 }
 
 Server::~Server()

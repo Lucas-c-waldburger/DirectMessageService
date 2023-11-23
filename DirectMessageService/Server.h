@@ -27,6 +27,30 @@ private:
 };
 
 
+class UserMap
+{
+public:
+	using Username = std::string;
+
+	bool addUsername(const std::string& usernm);
+
+private:
+	std::unordered_map<SOCKET, Username> users;
+
+	// makes unique keys for map representing that the user has not
+	// sent a valid username to register them with
+	//struct InvalidUsernames
+	//{
+	//	InvalidUsernames();
+
+	//	int count;
+	//	static Username makeInvalidUsername();
+	//} invalidUsernames;
+
+	bool notRegistered(Username nm);
+
+};
+
 
 class RawTextParser
 {
