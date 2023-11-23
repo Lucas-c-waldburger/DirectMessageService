@@ -1,6 +1,9 @@
 #include <iostream>
+#include <limits>
+#include <numeric>
 #include "App.h"
-#include "PacketImpl.h"
+#include "Server.h"
+
 
 using namespace Utils;
 
@@ -9,22 +12,31 @@ int main()
     if (!App::Init())
         return -1;
 
-    FdIndexPacket fdPack;
 
-    fdPack.fill(3);
 
-    uint16_t conv, conv2;
 
-    memcpy(&conv, fdPack.get(), sizeof(conv));
+    //using socket_t = decltype(socket(0, 0, 0));
+
+    //std::cout << (std::numeric_limits<socket_t>::max)() << '\n'
+    //    << (std::numeric_limits<unsigned long long>::max)();
+
+    //constexpr unsigned long long ull = (std::numeric_limits<unsigned long long>::max)();
+
+    //int32_t* value1 = (int32_t*)&ull;
+    //int32_t* value2 = (int32_t*)&ull + 1;
+
+    //std::cout << "ULL: " << ull << '\n'
+    //    << "INT32_A: " << *value1 << '\n'
+    //    << "INT32_B: " << *value2 << '\n';
     
     //conv2 = ntohs(conv);
 
-    std::cout << conv;
+    //SOCKET sck = 0;
+    //uint32_t convSck = static_cast<uint32_t>(sck);
 
  /*   uint16_t sh = 0;
     uint16_t sh2;
     char buf1[2];
-    char buf2[2];
 
 
     memcpy(buf1, &sh, sizeof(sh));*/

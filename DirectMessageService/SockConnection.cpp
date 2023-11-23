@@ -4,10 +4,13 @@ SockConnection::SockConnection() : addrData(nullptr)
 {}
 
 SockConnection::~SockConnection()
-{}
+{
+    close(); // maybe not in destructor
+}
 
 
-int SockConnection::setUp(const char* host, const char* port)
+// if true, we can be sure that addrData is not null
+bool SockConnection::setUp(const char* host, const char* port)
 {
     SOCKET fd;
     addrinfo* ai, * p;
@@ -15,7 +18,7 @@ int SockConnection::setUp(const char* host, const char* port)
     if (SC_getAddrInfo(host, port, ai) == SOCKET_ERROR)
     {
         reportWSAErr("SC_getAddrInfo()", WSAGetLastError());
-        return -1;
+        return false;
     }
 
     fd = connectionTask(ai, p);
@@ -24,7 +27,7 @@ int SockConnection::setUp(const char* host, const char* port)
     {
         freeaddrinfo(ai);
         reportWSAErr("connectionTask()", WSAGetLastError());
-        return -1;
+        return false;
     }
 
     // p not null, use it to construct addrData ptr
@@ -32,67 +35,66 @@ int SockConnection::setUp(const char* host, const char* port)
 
     freeaddrinfo(ai);
 
-    return 0;
+    return (addrData != nullptr);
 }
 
-bool SockConnection::isSetUp()
+bool SockConnection::isSetUp() const
 {
     return addrData != nullptr;
 }
 
+bool SockConnection::close()
+{
+    if (addrData != nullptr)
+    {
+        if (closesocket(addrData->fd) == SOCKET_ERROR)
+        {
+            reportWSAErr("close()", WSAGetLastError());
+            return false;
+        }
 
-SOCKET SockConnection::getFd() const
+        addrData = nullptr;
+    }
+
+    return true;
+}
+
+std::unique_ptr<SockConnection::SC_AddrData>& SockConnection::getAddrData()
 {
     if (!addrData)
         throw std::runtime_error("SockConnection not set up");
 
-    return addrData->sockFd;
+    return addrData;
 }
 
-
-int SockConnection::getFamily() const
+SockConnection::SC_AddrData::SC_AddrData(SOCKET fd, addrinfo* p) : fd(fd), family(p->ai_family)
 {
-    if (!addrData)
-        throw std::runtime_error("SockConnection not set up");
-
-    return addrData->family;
+    makeAddrStr(p);
 }
 
-
-std::string SockConnection::getAddrStr() const
-{
-    if (!addrData)
-        throw std::runtime_error("SockConnection not set up");
-
-    return addrData->addrStr;
-}
-
-
+// this doesn't need to be a factory?
 std::unique_ptr<SockConnection::SC_AddrData> SockConnection::SC_AddrData::makeAddrData(SOCKET fd, addrinfo* p)
 {
-    auto addrData = std::make_unique<SC_AddrData>();
+    auto addrData = std::make_unique<SC_AddrData>(fd, p);
 
-    if (addrData->makeAddrStr(p) == -1)
+    if (!addrData->makeAddrStr(p))
         return nullptr;
-
-    addrData->sockFd = fd;
-    addrData->family = p->ai_family;
 
     return addrData;
 }
 
 
-int SockConnection::SC_AddrData::makeAddrStr(addrinfo* p)
+bool SockConnection::SC_AddrData::makeAddrStr(addrinfo* p)
 {
     inet_ntop(p->ai_family, castInAddrIPv((struct sockaddr*)p->ai_addr), this->addrStr, sizeof(addrStr));
 
     if (!addrStr)
     {
         reportWSAErr("makeAddrStr(): inet_ntop", WSAGetLastError());
-        return -1;
+        return false;
     }
 
-    return 0;
+    return true;
 }
 
 
@@ -105,12 +107,12 @@ int SockConnection::SC_getAddrInfo(const char* host, const char* port, addrinfo*
 
 int SockConnection::SC_bindFirstAvail(addrinfo* ai, addrinfo*& p)
 {
-    SOCKET sockFd;
+    SOCKET fd;
     int errRet;
 
     for (p = ai; p != nullptr; p = p->ai_next)
     {
-        if ((sockFd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == SOCKET_ERROR)
+        if ((fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == SOCKET_ERROR)
         {
             errRet = WSAGetLastError();
             reportWSAErr("socket()", errRet);
@@ -118,9 +120,9 @@ int SockConnection::SC_bindFirstAvail(addrinfo* ai, addrinfo*& p)
             continue;
         }
 
-        setReuse(sockFd);
+        setSockReuse(fd);
 
-        if (bind(sockFd, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR)
+        if (bind(fd, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR)
         {
             errRet = WSAGetLastError();
             reportWSAErr("bind()", errRet);
@@ -131,18 +133,18 @@ int SockConnection::SC_bindFirstAvail(addrinfo* ai, addrinfo*& p)
         break;
     }
 
-    return (!p) ? SOCKET_ERROR : sockFd;
+    return (!p) ? SOCKET_ERROR : fd;
 }
 
 
 int SockConnection::SC_connectFirstAvail(addrinfo* ai, addrinfo*& p)
 {
-    SOCKET sockFd;
+    SOCKET fd;
     int errRet;
 
     for (p = ai; p != nullptr; p = p->ai_next)
     {
-        if ((sockFd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == SOCKET_ERROR)
+        if ((fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == SOCKET_ERROR)
         {
             errRet = WSAGetLastError();
             reportWSAErr("socket()", errRet);
@@ -150,11 +152,9 @@ int SockConnection::SC_connectFirstAvail(addrinfo* ai, addrinfo*& p)
             continue;
         }
 
-        setReuse(sockFd);
-
-        if (connect(sockFd, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR)
+        if (connect(fd, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR)
         {
-            closesocket(sockFd);
+            closesocket(fd);
             errRet = WSAGetLastError();
             reportWSAErr("connect()", errRet);
             std::cout << "attempting next...\n";
@@ -164,7 +164,7 @@ int SockConnection::SC_connectFirstAvail(addrinfo* ai, addrinfo*& p)
         break;
     }
 
-    return (!p) ? SOCKET_ERROR : sockFd;
+    return (!p) ? SOCKET_ERROR : fd;
 }
 
 

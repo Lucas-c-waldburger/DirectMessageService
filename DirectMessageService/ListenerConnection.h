@@ -10,7 +10,7 @@ public:
 	ListenerConnection();
 	virtual ~ListenerConnection();
 
-	int startListen();
+	bool startListen();
 
 private:
 	int backLog;

@@ -33,7 +33,7 @@
     <ClCompile Include="ListenerConnection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServerConnection.cpp">
+    <ClCompile Include="ClientConnection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Packet.cpp">
@@ -43,6 +43,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PollGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MsgBuf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,7 +71,7 @@
     <ClInclude Include="ListenerConnection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerConnection.h">
+    <ClInclude Include="ClientConnection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Packet.h">
@@ -75,6 +84,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PollGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MsgBuf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketSerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

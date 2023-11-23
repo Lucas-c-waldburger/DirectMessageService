@@ -4,33 +4,42 @@
 
 using namespace Utils;
 
+
+// what do i actually NEED from here
+	// auto-set up functionality
+	// SOCKET fd
+	
 class SockConnection
 {
 public:
+	struct SC_AddrData;
+
 	SockConnection();
 	virtual ~SockConnection();
 
-	int setUp(const char* host, const char* port);
-	bool isSetUp();
+	bool setUp(const char* host, const char* port);
+	bool isSetUp() const;
+	bool close();
 
-	SOCKET getFd() const;
-	int getFamily() const;
-	std::string getAddrStr() const;
+	std::unique_ptr<SC_AddrData>& getAddrData();
 
 protected:
 	struct SC_AddrData
 	{
-		SOCKET sockFd;
+		SC_AddrData(SOCKET fd, addrinfo* p);
+
+		SOCKET fd;
 		int family;
 		char addrStr[INET6_ADDRSTRLEN];
 
 		static std::unique_ptr<SC_AddrData> makeAddrData(SOCKET fd, addrinfo* p);
 
 	private:
-		int makeAddrStr(addrinfo* p);
+		bool makeAddrStr(addrinfo* p);
 	};
 	std::unique_ptr<SC_AddrData> addrData;
 
+	// either bound to bindFirstAvail or connectFirstAvail
 	int (*connectionTask) (addrinfo*, addrinfo*&) = 0;
 
 	static int SC_getAddrInfo(const char* host, const char* port, addrinfo*& ai);
@@ -39,6 +48,29 @@ protected:
 };
 
  
+//namespace SockConnections
+//{
+//	int SC_getAddrInfo(const char* host, const char* port, addrinfo*& ai);
+//	int SC_bindFirstAvail(addrinfo* ai, addrinfo*& p);
+//	int SC_connectFirstAvail(addrinfo* ai, addrinfo*& p);
+//
+//	//std::unique_ptr<SC_AddrData> makeAddrData(SOCKET fd, addrinfo* p);
+//
+//	struct SC_AddrData
+//	{
+//		SC_AddrData(SOCKET fd, addrinfo* p);
+//
+//		SOCKET fd;
+//		int family;
+//		char addrStr[INET6_ADDRSTRLEN];
+//
+//		static std::unique_ptr<SC_AddrData> makeAddrData(SOCKET fd, addrinfo* p);
+//
+//	private:
+//		bool makeAddrStr(addrinfo* p);
+//	};
+//};
 
 
-
+// makeListener
+// makeServConnection

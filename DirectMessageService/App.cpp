@@ -12,6 +12,7 @@ bool App::Init()
     try
     {
         wsaInit = std::make_unique<WSAInit>();
+        server = std::make_unique<Server>(HOST_IP, PORT);
     }
 
     catch (std::runtime_error& ex)
@@ -20,5 +21,7 @@ bool App::Init()
         return false;
     }
 
+
+    return true;
 }
 

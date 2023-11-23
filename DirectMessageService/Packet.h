@@ -3,6 +3,15 @@
 
 using namespace Utils;
 
+enum class PacketType
+{
+	MESSAGE = 1,
+	CHANNEL_OPEN_REQ,
+	CHANNEL_CLOSE_REQ,
+	LIST_USERS_REQ,
+	
+};
+
 template <typename T, int BUF_SIZE>
 class Packet
 {
@@ -14,8 +23,11 @@ public:
 	virtual void clearBuf();
 
 protected:
+	//friend class boost::serialization::access;
+
 	char buf[BUF_SIZE];
 	Endian byteOrdering;
+	PacketType packType;
 };
 
 template <typename T, int BUF_SIZE>
@@ -59,20 +71,20 @@ inline Packet<T, BUF_SIZE>::Packet(Endian byteOrd) : byteOrdering(byteOrd)
 template<typename T, int BUF_SIZE>
 inline char* Packet<T, BUF_SIZE>::readBuf()
 {
-	return buf;
+	return this->buf;
 }
 
 template<typename T, int BUF_SIZE>
 inline void Packet<T, BUF_SIZE>::clearBuf()
 {
-	memset(buf, 0, sizeof(buf));
+	memset(this->buf, 0, sizeof(this->buf));
 }
 
 
 // -------------- OutPacket --------------- //
 
 template<typename T, int BUF_SIZE>
-inline OutPacket<T, BUF_SIZE>::OutPacket() : Packet(Endian::TO_NETWORK), empty(true)
+inline OutPacket<T, BUF_SIZE>::OutPacket() : Packet<T, BUF_SIZE>(Endian::TO_NETWORK), empty(true)
 {}
 
 template<typename T, int BUF_SIZE>
@@ -89,8 +101,8 @@ inline void OutPacket<T, BUF_SIZE>::clearBuf()
 template<typename T, int BUF_SIZE>
 inline void OutPacket<T, BUF_SIZE>::fill(T data)
 {
-	T orderedData = convertDataByteOrder(data, byteOrdering);
-	memcpy(buf, &orderedData, sizeof(orderedData));
+	T orderedData = convertDataByteOrder(data, this->byteOrdering);
+	memcpy(this->buf, &orderedData, sizeof(orderedData));
 	empty = false;
 }
 
@@ -104,7 +116,7 @@ inline bool OutPacket<T, BUF_SIZE>::isEmpty()
 // -------------- InPacket --------------- //
 
 template<typename T, int BUF_SIZE>
-inline InPacket<T, BUF_SIZE>::InPacket() : Packet(Endian::TO_HOST)
+inline InPacket<T, BUF_SIZE>::InPacket() : Packet<T, BUF_SIZE>(Endian::TO_HOST)
 {}
 
 template<typename T, int BUF_SIZE>
@@ -116,3 +128,10 @@ inline T InPacket<T, BUF_SIZE>::getData()
 {
 	return data;
 }
+
+
+// -------------- Serialize / Deserialize --------------- //
+
+// Serialize (outpacket)
+	// 1. create outpacket (packType, fdDestination (either server or a specific user), dataContent)
+		// 1a. convert

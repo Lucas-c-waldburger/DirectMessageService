@@ -28,7 +28,7 @@ namespace Utils
 
     addrinfo makeHints();
 
-    int setReuse(SOCKET sockFd);
+    int setSockReuse(SOCKET sockFd);
 
 };
 
@@ -58,12 +58,9 @@ inline void Utils::prepDataForSend(T data, char* buf)
 template<typename T>
 inline T Utils::convertDataByteOrder(T data, Endian byteOrdering)
 {
-    if (sizeof(buf) < sizeof(T))
-        throw std::invalid_argument("buffer size too small to hold data type");
-
     T orderedData;
 
-    switch (sizeof(T) + byteOrdering)
+    switch (sizeof(T) + static_cast<size_t>(byteOrdering))
     {
     case (2):
         orderedData = htons(data); break;

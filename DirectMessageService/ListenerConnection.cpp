@@ -9,16 +9,19 @@ ListenerConnection::ListenerConnection() : SockConnection(), backLog(BACKLOG_MAX
 ListenerConnection::~ListenerConnection()
 {}
 
-int ListenerConnection::startListen() // maybe move out to handler class
+bool ListenerConnection::startListen() // maybe move out to handler class
 {
     if (!addrData)
-        throw std::runtime_error("SockConnection not set up");
-
-    if (listen(addrData->sockFd, backLog) == SOCKET_ERROR)
     {
-        reportWSAErr("startListen()", WSAGetLastError());
-        return -1;
+        std::cout << "SockConnection not set up\n";
+        return false;
     }
 
-    return 0;
+    if (listen(addrData->fd, backLog) == SOCKET_ERROR)
+    {
+        reportWSAErr("startListen()", WSAGetLastError());
+        return false;
+    }
+
+    return true;
 }

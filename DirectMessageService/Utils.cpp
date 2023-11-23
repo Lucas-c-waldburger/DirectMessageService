@@ -65,7 +65,7 @@ addrinfo Utils::makeHints()
     return hints;
 }
 
-int Utils::setReuse(SOCKET sockFd)
+int Utils::setSockReuse(SOCKET sockFd)
 {
     int yes = 1;
     return setsockopt(sockFd, SOL_SOCKET, SO_BROADCAST | SO_REUSEADDR, (const char*)&yes, sizeof(yes));
