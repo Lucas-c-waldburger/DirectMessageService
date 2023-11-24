@@ -1,6 +1,27 @@
 #pragma once
 #include "Packet.h"
 
+
+//CLIENT SIDE: user enters raw text 
+//CLIENT SIDE: parser takes raw text and interprets as a packet type
+//CLIENT SIDE: packet factory creates derived packet and fills it with data
+//CLIENT SIDE: serializer turns packet into serialized string
+//CLIENT SIDE: send()s serialized string.c_str() to server
+
+//SERVER SIDE: server recv()s char buffer from client
+//SERVER SIDE: deserializes to auto, checks type, returns appropriate packet type
+
+
+
+
+
+
+
+
+
+
+
+
 // Maybe channel makes outMsgPackets through a factory function, which holds the fdIndex and prepends it to the buf during creation
 // MAKE FILL() pure virtual in OutPacket, do the hton functins in the derived OutLrgDataPacket type
 

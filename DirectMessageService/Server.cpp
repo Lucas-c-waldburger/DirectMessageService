@@ -17,3 +17,26 @@ Server::Server(const char* host, const char* port) : pollGroup(nullptr)
 
 Server::~Server()
 {}
+
+
+
+//SOCKET UserSet::getFdByName(const std::string& nm)
+//{
+//	auto found = mSet.find(nm);
+//}
+
+
+bool UserSet::User::operator==(const User& rhs)
+{
+	return this->fd == rhs.fd && this->username == rhs.username;
+}
+
+bool UserSet::User::operator==(SOCKET fd)
+{
+	return this->fd == fd;
+}
+
+bool UserSet::User::operator==(const std::string& nm)
+{
+	return this->username == nm;
+}

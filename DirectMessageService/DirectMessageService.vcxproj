@@ -144,7 +144,6 @@
     <ClCompile Include="MsgBuf.cpp" />
     <ClCompile Include="Packet.cpp" />
     <ClCompile Include="PacketImpl.cpp" />
-    <ClCompile Include="PacketSerializer.cpp" />
     <ClCompile Include="PollGroup.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="ClientConnection.cpp" />
@@ -161,7 +160,6 @@
     <ClInclude Include="MsgBuf.h" />
     <ClInclude Include="Packet.h" />
     <ClInclude Include="PacketImpl.h" />
-    <ClInclude Include="PacketSerializer.h" />
     <ClInclude Include="PollGroup.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="ClientConnection.h" />

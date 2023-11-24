@@ -2,7 +2,8 @@
 #include "ListenerConnection.h"
 #include "PollGroup.h"
 #include "PacketImpl.h"
-#include <unordered_map>
+#include <unordered_set>
+#include <functional>
 
 
 // need an entered-text parser to convert raw char buf to proper Out PacketType
@@ -20,35 +21,32 @@ public:
 private:
 	ListenerConnection listener;
 	std::unique_ptr<PollGroup> pollGroup;
-	std::unordered_map<SOCKET, std::string> users;
+	//std::unordered_map<SOCKET, std::string> users;
 
 	//int acceptNewConnection();
 
 };
 
 
-class UserMap
+class UserSet
 {
 public:
-	using Username = std::string;
 
-	bool addUsername(const std::string& usernm);
+	//SOCKET getFdByName(const std::string& nm);
+	//std::string& getNameByFd(SOCKET fd);
 
 private:
-	std::unordered_map<SOCKET, Username> users;
+	struct User
+	{
+		SOCKET fd;
+		std::string username;
 
-	// makes unique keys for map representing that the user has not
-	// sent a valid username to register them with
-	//struct InvalidUsernames
-	//{
-	//	InvalidUsernames();
+		bool operator==(const User& rhs);
+		bool operator==(const std::string& nm);
+		bool operator==(SOCKET fd);
+	};
 
-	//	int count;
-	//	static Username makeInvalidUsername();
-	//} invalidUsernames;
-
-	bool notRegistered(Username nm);
-
+	std::unordered_set<User> mSet;
 };
 
 

@@ -1,166 +1,128 @@
 #pragma once
 #include "Utils.h"
-#include "PacketSerializer.h"
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/iostreams/device/back_inserter.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/unique_ptr.hpp>
 
-using namespace Utils;
+
+using SOCKET = unsigned long long;
 
 enum PacketType
 {
 	UNSPEC,
 	MESSAGE,
-	CHANNEL_OPEN_REQ,
+	NEW_CHANNEL_REQ,
 	CHANNEL_CLOSE_REQ,
 	LIST_USERS_REQ,
 };
-
 
 class Packet
 {
 public:
 	Packet();
-	Packet(PacketType type);
-	virtual ~Packet() = 0;
+	Packet(PacketType t);
+	virtual ~Packet() = default;
 
-	//static std::unique_ptr<OutPacket> makeOutPacket(PacketType);
-	//char* readBuf();
-	//virtual void clearBuf();
+	PacketType getType() const;
+
+	static void serialize(std::string& serialStr, std::unique_ptr<Packet> const& pack);
+	static std::unique_ptr<Packet> deserialize(const std::string& serialStr);
 
 protected:
+	PacketType type;
+
 	friend class boost::serialization::access;
-	friend class SerialPacket;
 
-	template <class Archive>
-	void serialize(Archive& ar, const unsigned int version)
+	template <typename Archive>
+	inline void serialize(Archive& ar, unsigned v)
 	{
-		ar& packType;
-		ar& dataStr;
+		ar& type;
 	}
-
-	PacketType packType;
-	std::string dataStr;
 };
 
-////// OUT //////
-class OutPacket : public Packet
+
+class MessagePacket : public Packet
 {
 public:
-	OutPacket();
-	OutPacket(PacketType type);
-	virtual ~OutPacket() override;
+	MessagePacket();
+	MessagePacket(SOCKET destFd, const std::string& msg);
+	virtual ~MessagePacket();
 
-	//virtual void clearBuf() override;
-	//virtual void fill(T data);
-	//bool isEmpty();
+	SOCKET getDestFd() const;
+	std::string getMsg() const;
 
 private:
+	friend class Mixin;
+
+	SOCKET destFd;
+	std::string msg;
+
 	friend class boost::serialization::access;
-	template <class Archive>
-	void serialize(Archive& ar, const unsigned int version)
+	friend class Packet;
+
+	template <typename Archive>
+	inline void serialize(Archive& ar, unsigned v)
 	{
-		ar & boost::serialization::base_object<Packet>(*this);
-		ar& packType;
-		ar& dataStr;
+		ar& boost::serialization::base_object<Packet>(*this);
+		ar& destFd;
+		ar& msg;
 	}
 };
 
-////// IN //////
-class InPacket : public Packet
+
+class ChannelReqPacket : public Packet
 {
 public:
-	InPacket();
-	InPacket(PacketType type);
-	virtual ~InPacket() override;
+	ChannelReqPacket();
+	ChannelReqPacket(const std::string& reqNm);
+	virtual ~ChannelReqPacket();
+
+	std::string getReqUsername() const;
 
 private:
+	friend class Mixin;
+
+	std::string reqUsername;
+
 	friend class boost::serialization::access;
-	template <class Archive>
-	void serialize(Archive& ar, const unsigned int version)
+	friend class Packet;
+
+	template <typename Archive>
+	inline void serialize(Archive& ar, unsigned v)
 	{
-		ar & boost::serialization::base_object<Packet>(*this);
-		ar & packType;
-		ar & dataStr;
+		ar& boost::serialization::base_object<Packet>(*this);
+		ar& reqUsername;
 	}
 };
+
+
+
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(Packet)
+BOOST_CLASS_EXPORT_KEY(MessagePacket) // (KEY and IMPLEMENT split between .h and .cpp to avoid linker errors)
+BOOST_CLASS_EXPORT_KEY(ChannelReqPacket)
 
 ////// SERIALIZING TOOL //////
 
-class SerialPacket
-{
-public:
-	SerialPacket();
-	~SerialPacket();
-
-	char* serialize(const OutPacket& outPack);
-	void deserialize(InPacket& inPack);
-
-	void clear();
-
-private:
-	std::string serialStr;
-	char* serialBuf;
-
-	void prepSerialBuf(size_t strSz);
-};
-
-
-
-
-
-// ------------------------ DEFINITIONS ---------------------------- //
-
-// -------------- Packet --------------- //
-
-
-//template<typename T, int BUF_SIZE>
-//inline char* Packet<T>::readBuf()
+//class SerialPacket
 //{
-//	return this->buf;
-//}
+//public:
+//	SerialPacket();
+//	~SerialPacket();
 //
-//template<typename T, int BUF_SIZE>
-//inline void Packet<T>::clearBuf()
-//{
-//	memset(this->buf, 0, sizeof(this->buf));
-//}
-
-
-// -------------- OutPacket --------------- //
-
-
-//template<typename T>
-//inline void OutPacket<T>::clearBuf()
-//{
-//	Packet<T, BUF_SIZE>::clearBuf();
-//	empty = true;
-//}
-
-//template<typename T>
-//inline void OutPacket<T>::fill(T data)
-//{
-//	T orderedData = convertDataByteOrder(data, this->byteOrdering);
-//	memcpy(this->buf, &orderedData, sizeof(orderedData));
-//	empty = false;
-//}
+//	char* serialize(const OutPacket& outPack);
+//	void deserialize(InPacket& inPack);
 //
-//template<typename T>
-//inline bool OutPacket<T>::isEmpty()
-//{
-//	return empty;
-//}
+//	void clear();
+//
+//private:
+//	std::string serialStr;
+//	char* serialBuf;
+//
+//	void prepSerialBuf(size_t strSz);
+//};
 
 
-// -------------- InPacket --------------- //
-
-
-//template<typename T>
-//inline T InPacket<T>::getData()
-//{
-//	return data;
-//}
-
-
-// -------------- Serialize / Deserialize --------------- //
-
-// Serialize (outpacket)
-	// 1. create outpacket (packType, fdDestination (either server or a specific user), dataContent)
-		// 1a. convert
