@@ -1,5 +1,6 @@
 #include "PollGroup.h"
 
+
 PollGroup::PollGroup(SOCKET listener) : timeout(-1)
 {
     add(listener, POLLIN);
@@ -9,7 +10,6 @@ PollGroup::PollGroup(SOCKET listener, int timeO) : timeout(timeO)
 {
     add(listener, POLLIN);
 }
-
 
 void PollGroup::add(SOCKET sockFd, short events)
 {

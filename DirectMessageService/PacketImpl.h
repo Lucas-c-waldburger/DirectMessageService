@@ -12,8 +12,20 @@
 //SERVER SIDE: deserializes to auto, checks type, returns appropriate packet type
 
 
+// CLIENT SIDE
+class ParseToPacket
+{
+public:
 
 
+
+
+
+private:
+
+
+
+};
 
 
 

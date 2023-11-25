@@ -9,12 +9,11 @@
 #include <boost/serialization/unique_ptr.hpp>
 
 
-using SOCKET = unsigned long long;
-
 enum PacketType
 {
 	UNSPEC,
 	MESSAGE,
+	USERNAME_REGISTRATION,
 	NEW_CHANNEL_REQ,
 	CHANNEL_CLOSE_REQ,
 	LIST_USERS_REQ,
@@ -98,6 +97,11 @@ private:
 		ar& reqUsername;
 	}
 };
+
+
+
+
+
 
 
 

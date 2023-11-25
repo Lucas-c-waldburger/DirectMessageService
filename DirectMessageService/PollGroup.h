@@ -19,10 +19,10 @@ public:
 
 	void add(SOCKET sockFd, short events);
 	bool remove(SOCKET sockFd);
-	IterPair getIters();
-
 	int poll();
 	int size();
+
+	IterPair getIters();
 
 private:
 	std::vector<pollfd> pfds;

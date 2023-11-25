@@ -4,13 +4,18 @@
 #include "App.h"
 #include "Server.h"
 
-
 using namespace Utils;
 
 int main()
 {
     if (!App::Init())
         return -1;
+
+
+    UserSet userSet;
+
+    std::cout << std::boolalpha << userSet.add(1, "lukazz1");
+    std::cout << std::boolalpha << userSet.remove(1);
 
 
 

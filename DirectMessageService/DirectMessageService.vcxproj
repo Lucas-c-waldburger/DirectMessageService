@@ -150,6 +150,7 @@
     <ClCompile Include="ListenerConnection.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SockConnection.cpp" />
+    <ClCompile Include="UserSet.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="WSAInit.cpp" />
   </ItemGroup>
@@ -165,6 +166,7 @@
     <ClInclude Include="ClientConnection.h" />
     <ClInclude Include="ListenerConnection.h" />
     <ClInclude Include="SockConnection.h" />
+    <ClInclude Include="UserSet.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="WSAInit.h" />
   </ItemGroup>

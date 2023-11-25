@@ -7,6 +7,21 @@ namespace Utils
 {
     void reportWSAErr(const std::string& location, int errCode);
 
+    //struct ErrReport
+    //{
+    //    ErrReport();
+    //    virtual ~ErrReport();
+
+    //    void success(const std::string& msg);
+    //    void fail(const std::string& msg);
+
+
+    //protected:
+    //    std::string attempt;
+
+    //    std::string assemble();
+    //};
+
     enum class Endian
     {
         TO_NETWORK,

@@ -2,7 +2,8 @@
 #include "ListenerConnection.h"
 #include "PollGroup.h"
 #include "PacketImpl.h"
-#include <unordered_set>
+#include "UserSet.h"
+#include <set>
 #include <functional>
 
 
@@ -21,33 +22,14 @@ public:
 private:
 	ListenerConnection listener;
 	std::unique_ptr<PollGroup> pollGroup;
-	//std::unordered_map<SOCKET, std::string> users;
+	UserSet users;
 
 	//int acceptNewConnection();
 
 };
 
 
-class UserSet
-{
-public:
 
-	//SOCKET getFdByName(const std::string& nm);
-	//std::string& getNameByFd(SOCKET fd);
-
-private:
-	struct User
-	{
-		SOCKET fd;
-		std::string username;
-
-		bool operator==(const User& rhs);
-		bool operator==(const std::string& nm);
-		bool operator==(SOCKET fd);
-	};
-
-	std::unordered_set<User> mSet;
-};
 
 
 class RawTextParser
