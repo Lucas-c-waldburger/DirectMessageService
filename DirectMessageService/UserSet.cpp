@@ -13,40 +13,69 @@ bool UserSet::add(SOCKET newFd, const std::string& newUsrnm)
 }
 
 
-//bool UserSet::remove(SOCKET fd)
-//{
-//    try
-//    {
-//        auto user = getUser(fd);
-//        return (!mSet.erase(fd));
-//    }
-//
-//    catch (std::invalid_argument& ex)
-//    {
-//        std::cout << ex.what() << '\n';
-//        return false;
-//    }
-//}
-
-
-SOCKET UserSet::operator[](const std::string& usrnm)
+bool UserSet::remove(SOCKET fd)
 {
-    auto found = mSet.get<BY_USERNAME>().find(usrnm);
+    try
+    {
+        auto user = getUser(fd);
+        return (mSet.erase(user) != mSet.get<BY_FD>().end());
+    }
 
-    if (found == mSet.get<BY_USERNAME>().end())
-        throw std::invalid_argument("Username does not exist in set");
-
-    return found->fd;
+    catch (std::invalid_argument& ex)
+    { 
+        std::cout << ex.what() << '\n';
+        return false;
+    }
 }
 
-const std::string& UserSet::operator[](SOCKET fd)
+// can only erase using fd as key, so we use usrnm to get the appropriate 
+// fd iterator and erase using that
+bool UserSet::remove(const std::string& usrnm)
 {
-    auto found = mSet.get<BY_FD>().find(fd);
+    try
+    {
+        auto userByNm = getUser(usrnm);
 
-    if (found == mSet.get<BY_FD>().end())
-        throw std::invalid_argument("socket fd does not exist in set");
+        if (found(userByNm))
+        {
+            auto userByFd = getUser(userByNm->fd);
+            return (mSet.erase(userByFd) != mSet.get<BY_FD>().end());
+        }
 
-    return found->username;
+        return false;
+    }
+
+    catch (std::invalid_argument& ex)
+    {
+        std::cout << ex.what() << '\n';
+        return false;
+    }
+}
+
+const SOCKET* UserSet::operator[](const std::string& usrnm)
+{
+    try
+    {
+        auto user = getUser(usrnm);
+        return &user->fd;
+    }
+    catch (std::invalid_argument& ex)
+    {
+        return nullptr;
+    }
+}
+
+const std::string* UserSet::operator[](SOCKET fd)
+{
+    try
+    {
+        auto user = getUser(fd);
+        return &user->username;
+    }
+    catch (std::invalid_argument& ex)
+    {
+        return nullptr;
+    }
 }
 
 UserSet::USER_ITER_FD UserSet::getUser(SOCKET fd)
@@ -69,13 +98,13 @@ UserSet::USER_ITER_USERNAME UserSet::getUser(const std::string& usrnm)
     return user;
 }
 
-bool UserSet::notFound(USER_ITER_FD& user)
+bool UserSet::found(USER_ITER_FD& user)
 {
-    return user == mSet.get<BY_FD>().end();
+    return user != mSet.get<BY_FD>().end();
 }
 
-bool UserSet::notFound(USER_ITER_USERNAME& user)
+bool UserSet::found(USER_ITER_USERNAME& user)
 {
-    return user == mSet.get<BY_USERNAME>().end();
+    return user != mSet.get<BY_USERNAME>().end();
 }
 

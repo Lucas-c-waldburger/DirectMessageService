@@ -2,7 +2,7 @@
 #include "WSAInit.h"
 
 
-
+// MOVE ALL THIS STUFF OUT
 namespace Utils
 {
     void reportWSAErr(const std::string& location, int errCode);

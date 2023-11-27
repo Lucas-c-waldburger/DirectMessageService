@@ -39,7 +39,7 @@
     <ClCompile Include="Packet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PacketImpl.cpp">
+    <ClCompile Include="CreateSerialPacket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Server.cpp">
@@ -51,10 +51,22 @@
     <ClCompile Include="MsgBuf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dep\ConsoleLogger\ConsoleLogger.cpp">
+    <ClCompile Include="UserSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UserSet.cpp">
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEntry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Connection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DMChannel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\SdlGuiApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,7 +95,7 @@
     <ClInclude Include="defs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PacketImpl.h">
+    <ClInclude Include="CreateSerialPacket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Server.h">
@@ -95,14 +107,23 @@
     <ClInclude Include="MsgBuf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dep\ConsoleLogger\ConsoleLogger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="UserSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="dep\ConsoleLogger\ConsoleLoggerHelper.exe" />
+    <ClInclude Include="Client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEntry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Connection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DMChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\SdlGuiApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

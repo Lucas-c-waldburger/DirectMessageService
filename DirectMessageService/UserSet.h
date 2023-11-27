@@ -19,15 +19,12 @@ class UserSet
 {
 public:
 	bool add(SOCKET newFd, const std::string& newUsrnm);
-    //bool remove(SOCKET fd);
+    bool remove(SOCKET fd);
+    bool remove(const std::string& usrnm);
 
-    template <typename T>
-    bool remove(const T& key);
 
-    //bool remove(const std::string& usrnm);
-
-	SOCKET operator[](const std::string& usrnm);
-	const std::string& operator[](SOCKET fd);
+	const SOCKET* operator[](const std::string& usrnm);
+	const std::string* operator[](SOCKET fd);
 
 
 private:
@@ -79,22 +76,7 @@ private:
     USER_ITER_FD getUser(SOCKET fd);
     USER_ITER_USERNAME getUser(const std::string& usrnm);
 
-    bool notFound(USER_ITER_FD& user);
-    bool notFound(USER_ITER_USERNAME& user);
+    bool found(USER_ITER_FD& user);
+    bool found(USER_ITER_USERNAME& user);
 };
 
-template<typename T>
-inline bool UserSet::remove(const T& key)
-{
-    try
-    {
-        auto user = getUser(key);
-        return (!notFound(mSet.erase(key)));
-    }
-
-    catch (std::invalid_argument& ex)
-    {
-        std::cout << ex.what() << '\n';
-        return false;
-    }
-}

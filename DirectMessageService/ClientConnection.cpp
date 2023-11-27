@@ -1,9 +1,9 @@
 #include "ClientConnection.h"
 
-ClientConnection::ClientConnection() : SockConnection()
+ClientConnectionOLD::ClientConnectionOLD() : SockConnection()
 {
     connectionTask = &SockConnection::SC_connectFirstAvail;
 }
 
-ClientConnection::~ClientConnection()
+ClientConnectionOLD::~ClientConnectionOLD()
 {}

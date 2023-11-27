@@ -1,5 +1,6 @@
 #pragma once
 #include "Utils.h"
+#include "TextEntry.h"
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
@@ -13,6 +14,7 @@ enum PacketType
 {
 	UNSPEC,
 	MESSAGE,
+	SERVER_COMMAND,
 	USERNAME_REGISTRATION,
 	NEW_CHANNEL_REQ,
 	CHANNEL_CLOSE_REQ,
@@ -73,19 +75,20 @@ private:
 };
 
 
-class ChannelReqPacket : public Packet
+class ServerCommandPacket : public Packet
 {
 public:
-	ChannelReqPacket();
-	ChannelReqPacket(const std::string& reqNm);
-	virtual ~ChannelReqPacket();
+	ServerCommandPacket();
+	ServerCommandPacket(TextEntry::Type servCmdType, const std::string& suppTxt);
+	virtual ~ServerCommandPacket();
 
-	std::string getReqUsername() const;
+	std::string getSupplementalText() const;
 
 private:
 	friend class Mixin;
 
-	std::string reqUsername;
+	TextEntry::Type servCmdType;
+	std::string supplementalText;
 
 	friend class boost::serialization::access;
 	friend class Packet;
@@ -94,28 +97,23 @@ private:
 	inline void serialize(Archive& ar, unsigned v)
 	{
 		ar& boost::serialization::base_object<Packet>(*this);
-		ar& reqUsername;
+		ar& servCmdType;
+		ar& supplementalText;
 	}
 };
 
 
-
-
-
-
-
-
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(Packet)
 BOOST_CLASS_EXPORT_KEY(MessagePacket) // (KEY and IMPLEMENT split between .h and .cpp to avoid linker errors)
-BOOST_CLASS_EXPORT_KEY(ChannelReqPacket)
+BOOST_CLASS_EXPORT_KEY(ServerCommandPacket)
 
 ////// SERIALIZING TOOL //////
 
-//class SerialPacket
+//class SerializedPacket
 //{
 //public:
-//	SerialPacket();
-//	~SerialPacket();
+//	SerializedPacket();
+//	~SerializedPacket();
 //
 //	char* serialize(const OutPacket& outPack);
 //	void deserialize(InPacket& inPack);

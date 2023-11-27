@@ -19,38 +19,6 @@ int main()
 
 
 
-    //using socket_t = decltype(socket(0, 0, 0));
-
-    //std::cout << (std::numeric_limits<socket_t>::max)() << '\n'
-    //    << (std::numeric_limits<unsigned long long>::max)();
-
-    //constexpr unsigned long long ull = (std::numeric_limits<unsigned long long>::max)();
-
-    //int32_t* value1 = (int32_t*)&ull;
-    //int32_t* value2 = (int32_t*)&ull + 1;
-
-    //std::cout << "ULL: " << ull << '\n'
-    //    << "INT32_A: " << *value1 << '\n'
-    //    << "INT32_B: " << *value2 << '\n';
-    
-    //conv2 = ntohs(conv);
-
-    //SOCKET sck = 0;
-    //uint32_t convSck = static_cast<uint32_t>(sck);
-
- /*   uint16_t sh = 0;
-    uint16_t sh2;
-    char buf1[2];
-
-
-    memcpy(buf1, &sh, sizeof(sh));*/
-    //memcpy(&sh2, buf1, sizeof(sh2));
-
-
-    //for (int i = 0; i < 2; i++)
-    //{
-    //    std::cout << "buf[" << i << "]: " << std::hexfloat << buf1[i] << '\n';
-    //}
 
 
 
@@ -74,7 +42,7 @@ int main()
         // map of usernames to fd's
         // poll array + managing interface
    // DOES:
-        // accept()s new connections <- ListenerConnection
+        // accept()s new connections <- ListenerConnectionOLD
         // register()s users (RegistrationRequest)
         // poll()s connections for events <- PollGroup
         // recv()s events(requests) from connections

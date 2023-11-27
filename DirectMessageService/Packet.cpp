@@ -14,8 +14,6 @@ PacketType Packet::getType() const
 
 void Packet::serialize(std::string& serialStr, std::unique_ptr<Packet> const& pack)
 {
-	serialStr.clear();
-
 	boost::iostreams::back_insert_device<std::string> inserter(serialStr);
 	boost::iostreams::stream<boost::iostreams::back_insert_device<std::string>> stream(inserter);
 	boost::archive::binary_oarchive oa(stream);
@@ -60,34 +58,34 @@ std::string MessagePacket::getMsg() const
 }
 
 
-ChannelReqPacket::ChannelReqPacket() : Packet(NEW_CHANNEL_REQ)
+ServerCommandPacket::ServerCommandPacket() : Packet(SERVER_COMMAND)
 {}
 
-ChannelReqPacket::ChannelReqPacket(const std::string& reqNm) : Packet(NEW_CHANNEL_REQ), reqUsername(reqNm)
+ServerCommandPacket::ServerCommandPacket(TextEntry::Type servCmdType, const std::string& suppTxt) : Packet(SERVER_COMMAND), supplementalText(suppTxt)
 {}
 
-ChannelReqPacket::~ChannelReqPacket()
+ServerCommandPacket::~ServerCommandPacket()
 {}
 
-std::string ChannelReqPacket::getReqUsername() const
+std::string ServerCommandPacket::getSupplementalText() const
 {
-	return reqUsername;
+	return supplementalText;
 }
 
 
 BOOST_CLASS_EXPORT_IMPLEMENT(MessagePacket)
-BOOST_CLASS_EXPORT_IMPLEMENT(ChannelReqPacket)
+BOOST_CLASS_EXPORT_IMPLEMENT(ServerCommandPacket)
 
 
-//SerialPacket::SerialPacket() : serialBuf(nullptr)
+//SerializedPacket::SerializedPacket() : serialBuf(nullptr)
 //{}
 //
-//SerialPacket::~SerialPacket()
+//SerializedPacket::~SerializedPacket()
 //{
 //	delete[] serialBuf;
 //}
 //
-//char* SerialPacket::serialize(const OutPacket& outPack)
+//char* SerializedPacket::serialize(const OutPacket& outPack)
 //{
 //	clear();
 //
@@ -100,14 +98,14 @@ BOOST_CLASS_EXPORT_IMPLEMENT(ChannelReqPacket)
 //	return serialBuf;
 //}
 //
-//void SerialPacket::deserialize(InPacket& inPack)
+//void SerializedPacket::deserialize(InPacket& inPack)
 //{
 //	if (!serialStr.empty())
 //		PacketSerializer::deSerialize(serialStr, inPack);
 //}
 //
 //
-//void SerialPacket::clear()
+//void SerializedPacket::clear()
 //{
 //	if (serialBuf)
 //		memset(serialBuf, 0, sizeof(serialBuf));
@@ -116,7 +114,7 @@ BOOST_CLASS_EXPORT_IMPLEMENT(ChannelReqPacket)
 //}
 //
 //
-//void SerialPacket::prepSerialBuf(size_t strSz)
+//void SerializedPacket::prepSerialBuf(size_t strSz)
 //{
 //	bool bufLargeEnough = false;
 //
@@ -133,3 +131,5 @@ BOOST_CLASS_EXPORT_IMPLEMENT(ChannelReqPacket)
 //	else if (!serialBuf || !bufLargeEnough)
 //		serialBuf = new char[strSz];
 //}
+
+

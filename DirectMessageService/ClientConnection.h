@@ -3,10 +3,10 @@
 
 
 
-class ClientConnection : public SockConnection
+class ClientConnectionOLD : public SockConnection
 {
 public:
-	ClientConnection();
-	virtual ~ClientConnection();
+	ClientConnectionOLD();
+	virtual ~ClientConnectionOLD();
 };
 

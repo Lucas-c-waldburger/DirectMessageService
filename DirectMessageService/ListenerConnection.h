@@ -4,15 +4,17 @@
 
 const int BACKLOG_MAX = 10;
 
-class ListenerConnection : public SockConnection
+class ListenerConnectionOLD : public SockConnection
 {
 public:
-	ListenerConnection();
-	virtual ~ListenerConnection();
+	ListenerConnectionOLD();
+	virtual ~ListenerConnectionOLD();
 
 	bool startListen();
 
 private:
 	int backLog;
 };
+
+
 

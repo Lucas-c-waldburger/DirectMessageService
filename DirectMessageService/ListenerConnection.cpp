@@ -1,15 +1,15 @@
 #include "ListenerConnection.h"
 
 
-ListenerConnection::ListenerConnection() : SockConnection(), backLog(BACKLOG_MAX)
+ListenerConnectionOLD::ListenerConnectionOLD() : SockConnection(), backLog(BACKLOG_MAX)
 {
     connectionTask = &SockConnection::SC_bindFirstAvail;
 }
 
-ListenerConnection::~ListenerConnection()
+ListenerConnectionOLD::~ListenerConnectionOLD()
 {}
 
-bool ListenerConnection::startListen() // maybe move out to handler class
+bool ListenerConnectionOLD::startListen() // maybe move out to handler class
 {
     if (!addrData)
     {
@@ -25,3 +25,6 @@ bool ListenerConnection::startListen() // maybe move out to handler class
 
     return true;
 }
+
+
+
