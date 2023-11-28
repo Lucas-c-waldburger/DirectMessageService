@@ -31,6 +31,11 @@ bool PollGroup::remove(SOCKET sockFd)
     return (toRemove != pfds.end());
 }
 
+const SOCKET& PollGroup::listenerFd()
+{
+    return pfds[0].fd;
+}
+
 PollGroup::IterPair PollGroup::getIters()
 {
     return std::make_pair(pfds.begin(), pfds.end());

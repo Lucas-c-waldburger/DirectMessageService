@@ -3,7 +3,7 @@
 #include <string_view>
 #include <unordered_map>
 
-
+// CLIENT-SIDE
 namespace TextEntry
 {
     const char SERV_COMMAND_CHAR = '/';

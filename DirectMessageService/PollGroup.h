@@ -22,6 +22,7 @@ public:
 	int poll();
 	int size();
 
+	const SOCKET& listenerFd();
 	IterPair getIters();
 
 private:

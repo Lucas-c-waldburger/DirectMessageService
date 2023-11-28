@@ -16,6 +16,193 @@ Server::Server(const char* host, const char* port) : pollGroup(nullptr)
 Server::~Server() 
 {}
 
+bool Server::eventLoop()
+{
+	int numEvents;
+	SOCKET newFd;
+	sockaddr_storage addrStore;
+	socklen_t addrLen;
+	char buf[256];
+	char remoteIP[INET6_ADDRSTRLEN];
+	const SOCKET& listenerFd = pollGroup->listenerFd();
+
+	bool running = true;
+	while (running)
+	{
+		numEvents = pollGroup->poll();
+
+		if (numEvents == SOCKET_ERROR)
+		{
+			reportWSAErr("poll()", WSAGetLastError());
+			return false;
+		}
+
+		if (!numEvents)
+			continue;
+
+		//// MAIN LOOP ////
+
+		auto [it, end] = pollGroup->getIters();
+
+		for (; it != end; it++)
+		{
+			if (!(it->revents & POLLIN))
+				continue;
+
+			if (it->fd == listenerFd)
+			{
+				addrLen = sizeof(addrStore);
+
+				newFd = accept(listenerFd, (sockaddr*)&addrStore, &addrLen);
+				
+				if (newFd == SOCKET_ERROR)
+				{
+					reportWSAErr("accept()", WSAGetLastError());
+					continue;
+				}
+
+				inet_ntop(addrStore.ss_family, (sockaddr*)&addrStore, remoteIP, INET6_ADDRSTRLEN);
+
+				if (!remoteIP)
+					reportWSAErr("inet_ntop()", WSAGetLastError());
+
+				pollGroup->add(newFd, POLLIN);
+
+				std::cout << "Poll Server: new connection from " << remoteIP << " on socket " << newFd << '\n'
+						  << "Requesting username...";
+
+				// TODO: Fix this!!!
+				//if (send(newFd, askUsernameBuf.data(), askUsernameBuf.maxLen(), 0) == SOCKET_ERROR)
+					//reportWSAErr("send()", WSAGetLastError());
+			}
+
+			else // user 
+			{
+				const SOCKET& userFd = it->fd;
+
+				// recv all data into recv buffer
+				recvAll(userFd);
+
+				// deserialize the packet sent by the user, return its type
+				auto& packetType = recvHandler.toPacket();
+
+				switch (packetType)
+				{
+				case MESSAGE:
+				{
+					auto& msg = recvHandler.getMsgPacket();
+
+					switch (msg.getMsgType())
+					{
+					case USERNAME_REQ:
+					{
+						// check if user has a registered username
+						if (!users.hasUsername(userFd))
+						{
+							// TODO: ADD USERNAME VALIDATION HERE!!!!
+							users.add(userFd, msg.getMsgStr());
+
+
+						}
+					}
+
+
+
+
+
+
+
+
+
+
+					}
+
+
+
+				}
+
+
+
+
+
+
+
+
+
+
+
+				}
+				// check if user has a registered username
+				if (!users.hasUsername(userFd))
+				{
+					// if not, check to see if the user has sent a username registration request
+
+
+
+
+				}
+
+
+
+
+
+				
+
+			}
+
+
+
+
+
+
+		}
+
+
+	}
+}
+
+bool Server::recvAll(SOCKET fd)
+{
+	recvHandler.getRecvBuf().clear();
+
+	size_t offset = 0;
+	int numBytesRecv = 0;
+
+	do
+	{
+		numBytesRecv = recv(fd, 
+							recvHandler.getRecvBuf().data() + offset, 
+							recvHandler.getRecvBuf().maxLen() - offset, 
+							0);
+
+		if (numBytesRecv <= 0)
+		{
+			if (numBytesRecv == SOCKET_ERROR)
+				reportWSAErr("recv()", WSAGetLastError());
+
+			else if (numBytesRecv == 0)
+				std::cout << "Connection closed by client on socket " << fd << '\n';
+
+			disconnectUser(fd);
+			return false;
+		}
+
+		// else got data in buf
+		offset += numBytesRecv;
+
+		if (offset >= recvHandler.getRecvBuf().maxLen())
+		{
+			std::cout << "Error: RecvBuffer could not hold all data sent by client on socket " << fd << '\n';
+			return false;
+		}
+
+	} while (recvHandler.getRecvBuf().data()[offset - 1] != 0);
+
+	return true;
+}
+
+
+
 // will only return false if closesocket() fails. 
 // Error conditions from pollGroup.remove() and
 // users.remove() only suggest that the socket

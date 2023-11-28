@@ -7,6 +7,8 @@ namespace Utils
 {
     void reportWSAErr(const std::string& location, int errCode);
 
+    constexpr size_t cExprStrlen(const char* s);
+
     //struct ErrReport
     //{
     //    ErrReport();

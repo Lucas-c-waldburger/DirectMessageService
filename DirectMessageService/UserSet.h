@@ -26,6 +26,8 @@ public:
 	const SOCKET* operator[](const std::string& usrnm);
 	const std::string* operator[](SOCKET fd);
 
+    bool hasUsername(SOCKET fd) const;
+    bool usernameExists(std::string_view usrnm);
 
 private:
     struct BY_FD {};

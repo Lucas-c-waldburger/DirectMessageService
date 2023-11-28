@@ -1,6 +1,6 @@
 #pragma once
 #include "Utils.h"
-#include "ClientConnection.h"
+#include "Connection.h"
 
 
 // has
@@ -14,7 +14,7 @@ public:
 
 
 private:
-	ClientConnectionOLD connection;
+	ClientConnection connection;
 
 };
 

@@ -78,6 +78,17 @@ const std::string* UserSet::operator[](SOCKET fd)
     }
 }
 
+bool UserSet::hasUsername(SOCKET fd) const
+{
+    return mSet.count(fd) > 0;
+}
+
+/* Maybe move outside UserSet class to specifically interact with UsernameValidator */
+bool UserSet::usernameExists(std::string_view usrnm)
+{
+    return this->operator[](std::string{usrnm}) != nullptr;
+}
+
 UserSet::USER_ITER_FD UserSet::getUser(SOCKET fd)
 {
     auto user = mSet.get<BY_FD>().find(fd);

@@ -1,15 +1,15 @@
 #include "Packet.h"
 
 
-Packet::Packet() : type(UNSPEC)
+Packet::Packet() : packetType(EMPTY)
 {}
 
-Packet::Packet(PacketType t) : type(t)
+Packet::Packet(PacketType pType) : packetType(pType)
 {}
 
-PacketType Packet::getType() const
+PacketType Packet::getPacketType() const
 {
-	return type;
+	return packetType;
 }
 
 void Packet::serialize(std::string& serialStr, std::unique_ptr<Packet> const& pack)
@@ -38,23 +38,28 @@ std::unique_ptr<Packet> Packet::deserialize(const std::string& serialStr)
 }
 
 
-MessagePacket::MessagePacket() : Packet(MESSAGE)
+MessagePacket::MessagePacket() : Packet(MESSAGE), msgType(UNSPEC), destFd(SOCKET_ERROR)
 {}
 
-MessagePacket::MessagePacket(SOCKET destFd, const std::string& msg) : Packet(MESSAGE), destFd(destFd), msg(msg)
+MessagePacket::MessagePacket(MessageType msgtyp, SOCKET destFd, const std::string& msg) : Packet(MESSAGE), msgType(msgtyp), destFd(destFd), msgStr(msg)
 {}
 
 MessagePacket::~MessagePacket()
 {}
+
+MessageType MessagePacket::getMsgType() const
+{
+	return msgType;
+}
 
 SOCKET MessagePacket::getDestFd() const
 {
 	return destFd;
 }
 
-std::string MessagePacket::getMsg() const
+std::string MessagePacket::getMsgStr() const
 {
-	return msg;
+	return msgStr;
 }
 
 

@@ -1,6 +1,6 @@
-#include "SdlGuiApp.h"
+#include "GUI.h"
 
-// APP
+//// GUI APP ////
 GUI::GUI::GUI()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
@@ -18,7 +18,7 @@ GUI::GUI::~GUI()
 }
 
 
-// WINDOW
+//// WINDOW ////
 GUI::Window::Window(const char* title)
 {
     pWindow = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
@@ -29,10 +29,8 @@ GUI::Window::Window(const char* title)
     }
 }
 
-
 GUI::Window::Window(const char* title, int w, int h, int x, int y, Uint32 flags)
 {
-
     pWindow = SDL_CreateWindow(title, x, y, w, h, flags);
 
     if (!pWindow)
@@ -52,7 +50,7 @@ GUI::Window::operator SDL_Window* ()
 }
 
 
-// RENDERER
+//// RENDERER ////
 GUI::Renderer::Renderer(SDL_Window* win)
 {
     pRenderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);

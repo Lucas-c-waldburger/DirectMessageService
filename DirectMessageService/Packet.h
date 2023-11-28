@@ -12,36 +12,39 @@
 
 enum PacketType
 {
-	UNSPEC,
+	EMPTY,
 	MESSAGE,
 	SERVER_COMMAND,
-	USERNAME_REGISTRATION,
-	NEW_CHANNEL_REQ,
-	CHANNEL_CLOSE_REQ,
-	LIST_USERS_REQ,
+};
+
+enum MessageType
+{
+	UNSPEC,
+	DIRECT_MSG,
+	USERNAME_REQ
 };
 
 class Packet
 {
 public:
 	Packet();
-	Packet(PacketType t);
+	Packet(PacketType pType);
 	virtual ~Packet() = default;
 
-	PacketType getType() const;
+	PacketType getPacketType() const;
 
 	static void serialize(std::string& serialStr, std::unique_ptr<Packet> const& pack);
 	static std::unique_ptr<Packet> deserialize(const std::string& serialStr);
 
 protected:
-	PacketType type;
+	PacketType packetType;
 
 	friend class boost::serialization::access;
 
 	template <typename Archive>
 	inline void serialize(Archive& ar, unsigned v)
 	{
-		ar& type;
+		ar& packetType;
 	}
 };
 
@@ -50,17 +53,19 @@ class MessagePacket : public Packet
 {
 public:
 	MessagePacket();
-	MessagePacket(SOCKET destFd, const std::string& msg);
+	MessagePacket(MessageType msgtyp, SOCKET destFd, const std::string& msg);
 	virtual ~MessagePacket();
 
+	MessageType getMsgType() const;
 	SOCKET getDestFd() const;
-	std::string getMsg() const;
+	std::string getMsgStr() const;
 
 private:
 	friend class Mixin;
 
+	MessageType msgType;
 	SOCKET destFd;
-	std::string msg;
+	std::string msgStr;
 
 	friend class boost::serialization::access;
 	friend class Packet;
@@ -69,8 +74,9 @@ private:
 	inline void serialize(Archive& ar, unsigned v)
 	{
 		ar& boost::serialization::base_object<Packet>(*this);
+		ar& msgType;
 		ar& destFd;
-		ar& msg;
+		ar& msgStr;
 	}
 };
 

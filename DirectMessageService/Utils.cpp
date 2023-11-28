@@ -12,6 +12,14 @@ void Utils::reportWSAErr(const std::string& location, int errCode)
               << "Message: " << errCond.message() << '\n';
 }
 
+constexpr size_t Utils::cExprStrlen(const char* s)
+{
+    return std::char_traits<char>::length(s) + 1;
+}
+
+
+
+
 //void Utils::prepDataHtons(uint16_t shData, char* buf)
 //{
 //    if (sizeof(buf) < sizeof(uint16_t))
