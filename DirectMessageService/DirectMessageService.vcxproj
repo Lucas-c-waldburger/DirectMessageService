@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -110,7 +110,8 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Dev\SDL2\include;C:\Libraries\boost_1_82_0\boost_1_82_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -128,7 +129,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Dev\SDL2\include;C:\Libraries\boost_1_82_0\boost_1_82_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -156,6 +158,7 @@
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TextEntry.cpp" />
+    <ClCompile Include="UsernameValidation.cpp" />
     <ClCompile Include="UserSet.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Validation.cpp" />
@@ -175,6 +178,7 @@
     <ClInclude Include="RecvHandler.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="TextEntry.h" />
+    <ClInclude Include="UsernameValidation.h" />
     <ClInclude Include="UserSet.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Validation.h" />

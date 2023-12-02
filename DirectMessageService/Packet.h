@@ -1,6 +1,8 @@
 #pragma once
 #include "Utils.h"
 #include "TextEntry.h"
+#include "UsernameValidation.h"
+#include <unordered_map>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
@@ -20,6 +22,7 @@ enum PacketType
 enum MessageType
 {
 	UNSPEC,
+	SIMPLE,
 	DIRECT_MSG,
 	USERNAME_REQ
 };
@@ -29,7 +32,7 @@ class Packet
 public:
 	Packet();
 	Packet(PacketType pType);
-	virtual ~Packet() = default;
+	virtual ~Packet();
 
 	PacketType getPacketType() const;
 
@@ -58,7 +61,7 @@ public:
 
 	MessageType getMsgType() const;
 	SOCKET getDestFd() const;
-	std::string getMsgStr() const;
+	const std::string& getMsgStr() const;
 
 private:
 	friend class Mixin;
@@ -134,3 +137,30 @@ BOOST_CLASS_EXPORT_KEY(ServerCommandPacket)
 //};
 
 
+namespace MessagePacketPreset
+{
+	enum PresetType
+	{
+		USRNM_SUCCESS,
+		USRNM_FAIL_LEN,
+		USRNM_FAIL_BAD_CHAR,
+		USRNM_FAIL_NOT_UNIQUE
+	};
+
+	inline std::unique_ptr<Packet> MsgPackPtr(std::string_view msg)
+	{
+		return std::make_unique<MessagePacket>(SIMPLE, SOCKET_ERROR, std::string{msg});
+	}
+
+
+	using namespace UsernameValidation::VCMsg;
+
+	inline const std::unordered_map<PresetType, std::unique_ptr<Packet>> presets =
+	{
+		{ USRNM_SUCCESS, MsgPackPtr(successMsg) },
+		{ USRNM_FAIL_LEN, MsgPackPtr(ValidLen::failMsg) },
+		{ USRNM_FAIL_BAD_CHAR, MsgPackPtr(LegalChars::failMsg) },
+		{ USRNM_FAIL_NOT_UNIQUE, MsgPackPtr(UniqueUsername::failMsg) }
+	};
+	
+}

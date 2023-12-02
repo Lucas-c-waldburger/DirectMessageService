@@ -18,6 +18,8 @@ struct User
 class UserSet
 {
 public:
+    UserSet() = default;
+
 	bool add(SOCKET newFd, const std::string& newUsrnm);
     bool remove(SOCKET fd);
     bool remove(const std::string& usrnm);

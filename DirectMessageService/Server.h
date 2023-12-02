@@ -2,13 +2,19 @@
 #include "Connection.h"
 #include "PollGroup.h"
 #include "CreateSerialPacket.h"
-#include "UserSet.h"
+#include "UsernameValidation.h"
 #include "RecvHandler.h"
 
+// TODO:
+	// in RecvHandler.h
+		// make RecvHandler into a DataTransmission abstract class
+		// have RecvHandler and SendHandler derive from it
+	// in Buffer.h (or new related file)
+		// make preset constexpr messages to populate send buffers with
+		// ex: successful connection, etc...
 
-// need an entered-text parser to convert raw char buf to proper Out PacketType
-	// determine PacketType
-	// make corresponding outPacket
+
+using namespace UsernameValidation;
 
 class Server
 {
@@ -23,10 +29,11 @@ public:
 private:
 	ListenerConnection listener;
 	std::unique_ptr<PollGroup> pollGroup; // change pollGroup ctor, make this stack allocated
-	UserSet users;
-	RecvHandler recvHandler;
 
-	//AskUsernameBuffer askUsernameBuf;
+	UserSet users;
+	UsernameValidator validateUsername;
+
+	RecvHandler recvHandler;
 
 	//int acceptConnection();
 	//int handleEvents();

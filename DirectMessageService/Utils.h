@@ -1,5 +1,89 @@
 #pragma once
 #include "WSAInit.h"
+#include <array>
+
+
+
+namespace 
+{
+    namespace CExprJoinViews
+    {
+        template <const std::string_view&...strArgs>
+        struct JoinViews
+        {
+            static constexpr auto joinImpl() noexcept
+            {
+                constexpr size_t len = (strArgs.size() + ... + 0);
+                std::array<char, len + 1> arr{};
+
+                int i = 0;
+                auto append = [&i, &arr](auto const& sv) mutable
+                {
+                    for (auto ch : sv)
+                        arr[i++] = ch;
+                };
+
+                (append(strArgs), ...);
+                arr[len] = 0;
+
+                return arr;
+            }
+
+            static constexpr auto joined = joinImpl();
+            static constexpr std::string_view value {joined.data(), joined.size() - 1};
+        };
+    }
+
+    template <const std::string_view&... strArgs>
+    static constexpr auto joinViews = CExprJoinViews::JoinViews<strArgs...>::value;
+
+    namespace CExprNumToStr
+    {
+        template<uint8_t... digits>
+        struct PosToChars
+        {
+            static constexpr const char value[] = { ('0' + digits)..., 0 };
+        };
+
+        template<uint8_t... digits>
+        struct NegToChars
+        {
+            static constexpr const char value[] = { '-', ('0' + digits)..., 0 };
+        };
+
+
+        template<bool neg, uint8_t... digits>
+        struct ToChars : PosToChars<digits...>
+        {};
+
+        template<uint8_t... digits>
+        struct ToChars<true, digits...> : NegToChars<digits...>
+        {};
+
+
+        template<bool neg, uintmax_t rem, uint8_t... digits>
+        struct ProcessDecimals : ProcessDecimals<neg, rem / 10, rem % 10, digits...>
+        {};
+
+        template<bool neg, uint8_t... digits>
+        struct ProcessDecimals<neg, 0, digits...> : ToChars<neg, digits...>
+        {};
+
+
+        template<typename T>
+        constexpr uintmax_t cExprCabs(T num)
+        {
+            return (num < 0) ? -num : num;
+        }
+    };
+
+    // enter just the typename "signed" or "unsigned" when calling
+    template<typename Integer, Integer num>
+    struct NumToStr : CExprNumToStr::ProcessDecimals<(num < 0), CExprNumToStr::cExprCabs(num)> // the "bool neg" template param in Process Decimals is evaluated in the parent struct template arg
+    {};
+};
+
+
 
 
 // MOVE ALL THIS STUFF OUT
@@ -9,20 +93,6 @@ namespace Utils
 
     constexpr size_t cExprStrlen(const char* s);
 
-    //struct ErrReport
-    //{
-    //    ErrReport();
-    //    virtual ~ErrReport();
-
-    //    void success(const std::string& msg);
-    //    void fail(const std::string& msg);
-
-
-    //protected:
-    //    std::string attempt;
-
-    //    std::string assemble();
-    //};
 
     enum class Endian
     {

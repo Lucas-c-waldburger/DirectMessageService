@@ -10,14 +10,14 @@ class Buffer
 {
 public:
 	Buffer();
-	virtual ~Buffer() = 0;
+	~Buffer();
 
 	char* data();
 	const size_t maxLen() const;
 	const size_t currentLen() const;
 	void clear();
 
-protected:
+private:
 	Buffer(const char* setMsg);
 	char mBuf[BUF_LEN];
 };
@@ -65,15 +65,14 @@ inline Buffer<BUF_LEN>::Buffer(const char* setMsg)
 
 //// RECVBUFFER ////
 
-const constexpr size_t RECV_BUF_LEN = 4096;
+constexpr size_t RECV_BUF_LEN = 4096;
+using RecvBuffer = Buffer<RECV_BUF_LEN>;
 
-class RecvBuffer : public Buffer<RECV_BUF_LEN>
-{
-public:
-	RecvBuffer();
-	virtual ~RecvBuffer();
 
-};
+//// SENDBUFFER ////
+
+constexpr size_t SEND_BUF_LEN = 4096;
+using SendBuffer = Buffer<SEND_BUF_LEN>;
 
 //// BUFFER PRESETS ////
 

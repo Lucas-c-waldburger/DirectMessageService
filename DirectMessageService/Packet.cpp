@@ -7,6 +7,9 @@ Packet::Packet() : packetType(EMPTY)
 Packet::Packet(PacketType pType) : packetType(pType)
 {}
 
+Packet::~Packet()
+{}
+
 PacketType Packet::getPacketType() const
 {
 	return packetType;
@@ -57,7 +60,7 @@ SOCKET MessagePacket::getDestFd() const
 	return destFd;
 }
 
-std::string MessagePacket::getMsgStr() const
+const std::string& MessagePacket::getMsgStr() const
 {
 	return msgStr;
 }

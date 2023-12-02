@@ -1,137 +1,69 @@
 #pragma once
-#include <iostream>
-#include <vector>
 #include <string_view>
+#include <stdexcept>
+#include <vector>
 
 namespace Validation
 {
-    template <typename T>
-    using VCFunc = bool(*)(T);
-
-    //// REF OBJ-DEPENDANT VFUNC WRAPPER (BASE) ////
-
-    template <typename REF_OBJ, typename T>
-    struct RefDependantVFunc
+    // derived classes job to override checkUsrnm and utilize the objPtr taken in by parent
+    template <typename REF_OBJ>
+    class ValidationCheck
     {
-        RefDependantVFunc(REF_OBJ& ro);
-        virtual ~RefDependantVFunc();
+    public:
+        ValidationCheck(bool needRO) : needsRefObj(needRO) {};
+        virtual ~ValidationCheck() {};
 
-        virtual bool vf(T arg) = 0;
+        const bool needsRefObj;
+        std::string_view operator()(std::string_view svIn, REF_OBJ* pObj) { return vcFuncExWrapper(svIn, pObj); }
 
     protected:
-        REF_OBJ& refObj;
+        virtual std::string_view vcFunc(std::string_view svIn, REF_OBJ* pObj) = 0; // will return a pre-constructed fail message or NULL_VIEW
+        std::string_view vcFuncExWrapper(std::string_view svIn, REF_OBJ* pObj) // ensures we don't get screwed by a null exception from mishandled default constructor args
+        {
+            if (needsRefObj && !pObj)
+                throw std::logic_error("function requires pointer to an existing object, found nullptr instead");
+
+            return vcFunc(svIn, pObj);
+        }
     };
 
 
+    // NULL_VIEW exists as a substitute for false
+    static constexpr std::string_view NULL_VIEW = "";
+    inline bool success(std::string_view sv) { return sv == NULL_VIEW; }
 
-
-    //// VCHECK DECL ////
-
-    template <typename T>
-    struct VCheck
-    {
-        VCheck(VCFunc<T> vcf, const std::string& fMsg);
-
-        const std::string& getFailMsg() const;
-        bool operator()(T arg);
-
-    private:
-        VCFunc<T> vcFunc;
-        std::string failMsg;
-    };
-
-
-    //// VALIDATOR DECL ////
-
-    template <typename T>
+    // validator accepts variable number of constexpr vcheck-derived class instances
+    // that either rely on the same object to perform their function, or don't rely on any object at all
+    // validator holds a pointer to the needed object and seeds vchecks with it when called 
+    // depending on their "needsRefObj" member bool
+    template <typename REF_OBJ>
     class Validator
     {
     public:
-        Validator() = default;
-        Validator(std::initializer_list<VCheck<T>> vcs);
-
-        bool operator()(T arg);
-        void addVCheck(VCheck<T> vc);
-        const std::string& getLastFailMsg() const;
-
-    private:
-        std::vector<VCheck<T>> validationChecks;
-        std::string lastFailMsg;
-    };
-
-
-    //// VALIDATOR TYPEDEFS ////
-
-    using UsernameValidator = Validator<std::string_view>;
-
-
-
-    //// VCHECK DEFS ////
-
-    template<typename T>
-    inline VCheck<T>::VCheck(VCFunc<T> vcf, const std::string& fMsg) : vcFunc(vcf), failMsg(fMsg)
-    {}
-
-    template<typename T>
-    inline const std::string& VCheck<T>::getFailMsg() const
-    {
-        return failMsg;
-    }
-
-    template<typename T>
-    inline bool VCheck<T>::operator()(T arg)
-    {
-        return vcFunc(arg);
-    }
-
-
-    //// REF-DEPENDANT VFUNC DEFS ////
-
-    template<typename REF_OBJ, typename T>
-    inline RefDependantVFunc<REF_OBJ, T>::RefDependantVFunc(REF_OBJ& ro) : refObj(ro)
-    {}
-
-    template<typename REF_OBJ, typename T>
-    inline RefDependantVFunc<REF_OBJ, T>::~RefDependantVFunc()
-    {}
-
-
-    //// VALIDATOR DEFS ////
-
-    template<typename T>
-    inline Validator<T>::Validator(std::initializer_list<VCheck<T>> vcs)
-    {
-        for (auto& vc : vcs)
-            validationChecks.push_back(vc);
-    }
-
-    template<typename T>
-    inline bool Validator<T>::operator()(T arg)
-    {
-        for (auto& vc : validationChecks)
+        Validator(REF_OBJ& refObj, std::initializer_list<ValidationCheck<REF_OBJ>*> vcs) : objPtr(&refObj)
         {
-            if (!vc(arg))
-            {
-                lastFailMsg = vc.getFailMsg();
-                return false;
-            }
+            for (auto& vc : vcs)
+                vChecks.push_back(vc);
         }
-        return true;
-    }
+        
+        virtual ~Validator() {};
+        
 
-    template<typename T>
-    inline void Validator<T>::addVCheck(VCheck<T> vc)
-    {
-        validationChecks.push_back(vc);
-    }
+        std::string_view operator()(std::string_view svIn)
+        {
+            for (auto& vc : vChecks)
+            {
+                std::string_view retMsg = (vc->needsRefObj) ? (*vc)(svIn, objPtr) : (*vc)(svIn, nullptr);
 
-    template<typename T>
-    inline const std::string& Validator<T>::getLastFailMsg() const
-    {
-        return lastFailMsg;
-    }
+                if (retMsg != NULL_VIEW)
+                    return retMsg;
+            }
 
+            return NULL_VIEW;
+        }
 
-
-};
-
+    protected:
+        REF_OBJ* objPtr;
+        std::vector<ValidationCheck<REF_OBJ>*> vChecks; // non-owning pointers
+    };
+}

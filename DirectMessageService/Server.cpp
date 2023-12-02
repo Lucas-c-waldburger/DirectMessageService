@@ -1,6 +1,6 @@
 #include "Server.h"
 
-Server::Server(const char* host, const char* port) : pollGroup(nullptr)
+Server::Server(const char* host, const char* port) : pollGroup(nullptr), validateUsername(users)
 {
 	if (!listener.setUp(host, port))
 		throw std::runtime_error("Server set up failed");
@@ -71,7 +71,7 @@ bool Server::eventLoop()
 				std::cout << "Poll Server: new connection from " << remoteIP << " on socket " << newFd << '\n'
 						  << "Requesting username...";
 
-				// TODO: Fix this!!!
+				// TODO: Send a success message!!!
 				//if (send(newFd, askUsernameBuf.data(), askUsernameBuf.maxLen(), 0) == SOCKET_ERROR)
 					//reportWSAErr("send()", WSAGetLastError());
 			}
@@ -84,43 +84,58 @@ bool Server::eventLoop()
 				recvAll(userFd);
 
 				// deserialize the packet sent by the user, return its type
-				auto& packetType = recvHandler.toPacket();
+				auto& packetType = recvHandler.toPacket();  
 
 				switch (packetType)
 				{
 				case MESSAGE:
 				{
-					auto& msg = recvHandler.getMsgPacket();
+					auto& msgPacket = recvHandler.getMsgPacket();
 
-					switch (msg.getMsgType())
+					switch (msgPacket.getMsgType())
 					{
-					case USERNAME_REQ:
+					case USERNAME_REQ: // client trying to register a username they sent over
 					{
 						// check if user has a registered username
+						if (users.hasUsername(userFd))
+						{
+							// set SendHandler buffer to appropriate fail msg
+							// break;
+						}
+
+						std::string_view usernameView{msgPacket.getMsgStr()}; // make a view of the username
+						std::string_view retMsg = validateUsername(usernameView); 
+
+						if (Validation::success(retMsg))
+						{
+							// set SendHandler buffer to success msg
+							users.add(userFd, msgPacket.getMsgStr());
+						}
+
+						else
+						{
+							// set SendHandler buffer to retMsg
+							
+						}
+
+						break;
+					}
+					// OTHER CASES
+					case DIRECT_MSG:
+					{
 						if (!users.hasUsername(userFd))
 						{
-							// TODO: ADD USERNAME VALIDATION HERE!!!!
-							users.add(userFd, msg.getMsgStr());
-
-
+							// set SendHandler buffer to appropriate fail msg
+							// break;
 						}
-					}
-
-
-
-
-
 
 
 
 
 
 					}
-
-
-
 				}
-
+				case SERVER_COMMAND:
 
 
 
@@ -132,14 +147,6 @@ bool Server::eventLoop()
 
 
 				}
-				// check if user has a registered username
-				if (!users.hasUsername(userFd))
-				{
-					// if not, check to see if the user has sent a username registration request
-
-
-
-
 				}
 
 
